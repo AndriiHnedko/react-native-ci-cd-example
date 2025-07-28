@@ -1,0 +1,104 @@
+platform :android do
+    desc "Build app"
+    private_lane :build do |options|
+        increment_version_code(
+            gradle_file_path: './android/app/build.gradle',
+            version_code: options[:version_code]
+        )
+        gradle(task: 'clean', project_dir: './android')
+        gradle(
+            task: options[:task],
+            build_type: 'release',
+            project_dir: './android',
+            flavor: ENV["ANDROID_FLAVOR"],
+            properties: {
+                "android.injected.signing.store.file" => ENV["ANDROID_KEYSTORE_PATH"],
+                "android.injected.signing.store.password" => ENV["ANDROID_KEYSTORE_PASSWORD"],
+                "android.injected.signing.key.alias" => ENV["ANDROID_KEY_ALIAS"],
+                "android.injected.signing.key.password" => ENV["ANDROID_KEY_PASSWORD"],
+            }
+        )
+    end
+
+    desc "Build apk file"
+    private_lane :apk do |options|
+        build(task: 'assemble', version_code: options[:version_code])
+        copy_artifacts(
+            target_path: ENV['CI'] ? ENV['BITRISE_DEPLOY_DIR'] : 'artifacts',
+            artifacts: [lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]]
+        )
+        firebase_app_distribution(
+            app: ENV["ANDROID_FIREBASE_APP"],
+            groups: ENV["ANDROID_FIREBASE_DISTRIBUTION_GROUP"],
+            ipa_path: lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]
+        )
+    end
+
+    desc "Build aab file"
+    private_lane :aab do |options|
+        build(task: 'bundle', version_code: options[:version_code])
+        copy_artifacts(
+            target_path: ENV['CI'] ? ENV['BITRISE_DEPLOY_DIR'] : 'artifacts',
+            artifacts: [lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]]
+        )
+    end
+
+    desc "Build beta"
+    lane :beta do
+        apk(version_code: sh('date +"%Y%m%d%H%M%S"').to_i)
+    end
+
+    desc "Build release"
+    lane :release do
+        version_code = sh('date +"%Y%m%d%H%M%S"').to_i
+        apk(version_code: version_code)
+        aab(version_code: version_code)
+    end
+end
+
+platform :ios do
+    desc "Build iOS beta"
+    lane :beta do
+        setup_ci if ENV['CI']
+        match(
+            type: 'appstore',
+            readonly: is_ci
+        )
+        increment_build_number(
+            xcodeproj: './ios/ReactNativeCICD.xcodeproj',
+            build_number: sh('date +"%Y%m%d%H%M%S"').to_i
+        )
+        build_app(
+            workspace: './ios/ReactNativeCICD.xcworkspace',
+            scheme: ENV['IOS_SCHEME'],
+            output_directory: ENV['CI'] ? ENV['BITRISE_DEPLOY_DIR'] : 'artifacts'
+        )
+        upload_to_testflight(
+            skip_waiting_for_build_processing: true
+        )
+    end
+    desc "Bump build number"
+    lane :bump_build_number do
+        increment_build_number(
+            xcodeproj: './ios/ReactNativeCICD.xcodeproj',
+            build_number: sh('date +"%Y%m%d%H%M%S"').to_i
+        )
+    end
+end
+
+platform :common do
+    desc "Notify slack"
+    lane :notify_slack do
+        UI.message("BITRISE_BUILD_STATUS: #{ENV["BITRISE_BUILD_STATUS"]}")
+        slack(
+            success: ENV["BITRISE_BUILD_STATUS"] == '0',
+            default_payloads: [:test_result, :git_branch, :last_git_commit_hash, :last_git_commit],
+            payload: {
+              "Built by" => "Bitrise",
+              "Platform" => ENV["CURRENT_PLATFORM"],
+              "Build ID" => ENV["BITRISE_BUILD_NUMBER"],
+              "Status" => ENV["BITRISE_BUILD_STATUS"]  == '0' ? 'Success' : 'Error'
+            },
+        )
+    end
+end
