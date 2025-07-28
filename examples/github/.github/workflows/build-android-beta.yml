@@ -1,0 +1,35 @@
+name: build-android-beta
+on:
+  push:
+#    branches:
+#      - main
+    tags:
+      - 'android-beta/v*'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
+      ANDROID_KEYSTORE_PATH: ${{ secrets.ANDROID_KEYSTORE_PATH }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      ANDROID_FIREBASE_APP: ${{ secrets.ANDROID_FIREBASE_APP }}
+      ANDROID_FIREBASE_DISTRIBUTION_GROUP: ${{ secrets.ANDROID_FIREBASE_DISTRIBUTION_GROUP }}
+      $GOOGLE_APPLICATION_CREDENTIALS_CONTENT: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_CONTENT }}
+      GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+      RN_ENV: ${{ secrets.RN_ENV }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up ruby env
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4.2
+          bundler-cache: true
+      - name: Pre build actions
+        run: sh pipeline-pre-build.sh
+      - name: Install deps
+        run: yarn install
+      - name: Build android beta
+        run: bundle exec fastlane android beta
