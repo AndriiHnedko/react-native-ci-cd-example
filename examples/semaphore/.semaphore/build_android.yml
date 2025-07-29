@@ -1,0 +1,46 @@
+version: v1.0
+name: Build android
+agent:
+  machine:
+    type: e2-standard-2
+    os_image: ubuntu2204
+  containers:
+    - name: main
+      image: 'registry.semaphoreci.com/android:34-node'
+blocks:
+  - name: Fastlane Build
+    task:
+      env_vars:
+        - name: LANG
+          value: en_US.UTF-8
+        - name: CURRENT_PLATFORM
+          value: android
+      prologue:
+        commands:
+          - export GOOGLE_APPLICATION_CREDENTIALS="$(readlink -f google_credentials.json)"
+          - export ANDROID_KEYSTORE_PATH="$(readlink -f release.keystore)"
+          - node -v
+          - curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+          - sudo apt-get install -y nodejs
+          - corepack enable
+          - checkout
+          - export SOURCE_DIRECTORY=$(pwd)
+          - sh pipeline-pre-build.sh
+          - cache restore gems
+          - bundle install --path vendor/bundle
+          - cache store gems vendor/bundle
+          - cache restore libs-revision-$(checksum clonePrivateLibs.sh)
+          - test -d libs && echo "Cache hit, skipping clone" || sh clonePrivateLibs.sh
+          - cache store libs-revision-$(checksum clonePrivateLibs.sh) libs
+          - cache restore node_modules
+          - yarn install
+          - cache store node_modules node_modules
+      jobs:
+        - name: Build android app
+          commands:
+            - node -v
+            - cache restore gradle_caches
+            - bundle exec fastlane android beta
+            - cache store gradle_caches $HOME/.gradle/caches
+      secrets:
+        - name: GITHUB_PERSONAL_ACCESS_TOKEN

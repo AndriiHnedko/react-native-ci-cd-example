@@ -1,0 +1,24 @@
+version: v1.0
+name: Root pipeline
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu2004
+blocks:
+  - name: Start
+    task:
+      jobs:
+        - name: Echo branch
+          commands:
+            - echo $SEMAPHORE_GIT_BRANCH
+promotions:
+  - name: Build dev ios beta
+    pipeline_file: build_ios.yml
+    deployment_target: Lilypad_dev
+#    auto_promote:
+#      when: "branch = 'feature/1110-ci-cd'"
+  - name: Build dev android beta
+    pipeline_file: build_android.yml
+    deployment_target: Lilypad_dev
+    auto_promote:
+      when: "branch = 'feature/1110-ci-cd'"

@@ -1,0 +1,41 @@
+version: v1.0
+name: Build iOS
+agent:
+  machine:
+    type: a2-standard-4
+    os_image: macos-xcode16
+blocks:
+  - name: Fastlane Build
+    task:
+      env_vars:
+        - name: LANG
+          value: en_US.UTF-8
+        - name: CURRENT_PLATFORM
+          value: ios
+      prologue:
+        commands:
+          - checkout
+          - export SOURCE_DIRECTORY=$(pwd)
+          - sh pipeline-pre-build.sh
+          - cache restore gems
+          - bundle install --path vendor/bundle
+          - cache store gems vendor/bundle
+          - nvm install 20
+          - nvm use 20
+          - cache restore libs-revision-$(checksum clonePrivateLibs.sh)
+          - test -d libs && echo "Cache hit, skipping clone" || sh clonePrivateLibs.sh
+          - cache store libs-revision-$(checksum clonePrivateLibs.sh) libs
+          - cache restore node_modules
+          - yarn install
+          - cache store node_modules node_modules
+          - cd ios
+          - cache restore pods
+          - pod install
+          - cache store pods Pods
+          - cd ../
+      jobs:
+        - name: Build iOS app
+          commands:
+            - bundle exec fastlane ios beta
+      secrets:
+        - name: GITHUB_PERSONAL_ACCESS_TOKEN
