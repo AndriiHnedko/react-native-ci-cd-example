@@ -32,6 +32,8 @@ To disable this behavior, remove the following code:
 
 ## Build
 
+Builds are triggered manually via the Bitrise API.
+
 This workflow builds both iOS and Android apps for development, staging, and production environments using Fastlane.
 All environments use Apple ID authentication for connecting the Apple Developer Account via the Bitrise web interface.
 
