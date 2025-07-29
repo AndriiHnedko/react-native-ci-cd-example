@@ -36,6 +36,7 @@ Builds are triggered manually via the Bitrise API.
 
 This workflow builds both iOS and Android apps for development, staging, and production environments using Fastlane.
 All environments use Apple ID authentication for connecting the Apple Developer Account via the Bitrise web interface.
+Code signing is handled using Fastlane Match.
 
 Android builds are delivered to Firebase App Distribution, and iOS builds are delivered to TestFlight — both via Fastlane.
 Additionally, build artifacts are stored in Bitrise for download.
@@ -48,6 +49,10 @@ Apple Developer Account connection options:
 - App Store Connect API key via Fastlane
 - App Store Connect API key via Bitrise
 - Apple ID via Bitrise
+
+Code signing options for iOS:
+- Built-in Bitrise code signing and certificate management
+- Fastlane Match
 
 There are three types of environment variables:
 - Secret Environment Variables – Managed via the Bitrise web interface and shared across all workflows. It is recommended to use suffixes like DEV, STAGE, and PROD to differentiate environments.
