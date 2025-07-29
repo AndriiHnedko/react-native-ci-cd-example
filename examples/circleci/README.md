@@ -1,6 +1,6 @@
 # Setup
 
-Помістіть `.circle` папку в корінь вашого проекту
+Place the `.circleci` folder in the root of your project.
 
 # About
 

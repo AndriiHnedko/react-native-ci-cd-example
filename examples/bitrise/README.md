@@ -1,6 +1,6 @@
 # Setup
 
-Copy the contents of bitrise.yml into the configuration panel on bitrise.io, or place the file at the root of your project.
+Copy the contents of `bitrise.yml` into the configuration panel on bitrise.io, or place the file at the root of your project.
 
 # About
 
