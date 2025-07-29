@@ -16,19 +16,7 @@ This workflow installs and caches `node_modules` and iOS `Pods`. During the Andr
 
 ## Linting
 
-This workflow lints all pull requests. Only the modified lines are checked.
-To disable this behavior, remove the following code:
-
-```yaml
-      - script@1:
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                cp .eslintrc.pipeline .eslintrc
-                export ESLINT_PLUGIN_DIFF_COMMIT="origin/$BITRISEIO_GIT_BRANCH_DEST"
-                echo "ESLINT_PLUGIN_DIFF_COMMIT=$ESLINT_PLUGIN_DIFF_COMMIT"
-          title: Prepare lint env
-```
+This workflow lints all pull requests. Only the modified lines are checked using `eslint-plugin-diff`.
 
 ## Build
 
