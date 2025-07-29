@@ -51,8 +51,6 @@ There are three types of environment variables:
 - Project Environment Variables – Can be managed via the web interface or directly in the .yml file. These are stored in the .yml file.
 - Workflow Environment Variables – Can also be defined in the web interface or in the .yml file, and are specific to individual workflows.
 
-It is possible to manage bitrise.yml entirely from the web interface instead of storing it in the repository.
-
 ```yaml
 app:
   envs: # project-level env vars
@@ -74,3 +72,5 @@ workflows:
       bitrise.io:
         stack: osx-xcode-16.2.x
 ```
+
+It is possible to manage bitrise.yml entirely from the web interface instead of storing it in the repository.
