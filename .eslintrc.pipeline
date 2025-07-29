@@ -1,0 +1,104 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "prettier",
+    "import",
+    "react",
+    "jsx-expressions",
+    "react-native"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier",
+    "plugin:prettier/recommended",
+    "plugin:diff/diff"
+  ],
+  "rules": {
+    "no-console": "warn",
+    "prettier/prettier": "error",
+    "import/no-anonymous-default-export": "warn",
+    "object-curly-newline": [
+      "warn",
+      {
+        "ObjectExpression": {
+          "minProperties": 1
+        }
+      }
+    ],
+    "no-unneeded-ternary": "warn",
+    "no-implicit-coercion": [
+      "error",
+      {
+        "boolean": false
+      }
+    ],
+    "react/jsx-key": [
+      2,
+      {
+        "checkFragmentShorthand": true
+      }
+    ],
+    "jsx-expressions/strict-logical-expressions": "error",
+    "react/no-children-prop": "warn",
+    "react/no-object-type-as-default-prop": "error",
+    "react/jsx-no-constructed-context-values": [
+      "error",
+      {
+        "additionalLibraries": [
+          "classnames"
+        ]
+      }
+    ],
+    "react-native/no-unused-styles": "error",
+    "react-native/no-inline-styles": "error",
+    "react-native/no-raw-text": "error",
+    "react-native/no-single-element-style-arrays": "error",
+    "import/order": [
+      "error",
+      {
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        }
+      }
+    ],
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        "selector": "interface",
+        "format": [
+          "PascalCase"
+        ],
+        "prefix": [
+          "I"
+        ]
+      },
+      {
+        "selector": "typeAlias",
+        "format": [
+          "PascalCase"
+        ],
+        "prefix": [
+          "T"
+        ]
+      },
+      {
+        "selector": "enum",
+        "format": [
+          "PascalCase"
+        ],
+        "prefix": [
+          "E"
+        ]
+      }
+    ],
+    "@typescript-eslint/explicit-module-boundary-types": "off"
+  }
+}
