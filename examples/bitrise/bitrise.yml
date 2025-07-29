@@ -1,0 +1,209 @@
+---
+format_version: '23'
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+project_type: react-native
+app:
+  envs: #project env
+  - FASTLANE_XCODE_LIST_TIMEOUT: 120
+  - FASTLANE_WORK_DIR: "."
+    opts:
+      is_expand: false
+  - RN_MAPBOX_STYLE_STREETS: mapbox://styles/mapbox/streets-v11
+    opts:
+      is_expand: false
+  - RN_MAPBOX_STYLE_MONOCHROME: mapbox://styles/mapbox/light-v10
+    opts:
+      is_expand: false
+  - RN_MAPBOX_STYLE_SATELLITE: mapbox://styles/mapbox/satellite-v9
+    opts:
+      is_expand: false
+  - SLACK_URL: #your slack url
+    opts:
+      is_expand: false
+workflows:
+  build_ios_dev:
+    envs:
+    - ENV_FILE_NAME: ".env.development"
+      opts:
+        is_expand: false
+    - MATCH_PASSWORD: "$MATCH_PASSWORD_DEV" #secret env example
+    - RN_ENV: DEVELOPMENT #regular env example
+      opts:
+        is_expand: false
+#   here your other env variables
+    steps:
+    - bundle::build_ios: {}
+    meta:
+      bitrise.io:
+        stack: osx-xcode-16.2.x
+  build_android_dev:
+    envs:
+    - ENV_FILE_NAME: ".env.development"
+      opts:
+        is_expand: false
+    - RN_ENV: DEVELOPMENT
+      opts:
+        is_expand: false
+    steps:
+    - bundle::build_android: {}
+    meta:
+      bitrise.io:
+        stack: linux-docker-android-22.04
+        machine_type_id: g2.linux.large
+  lint_check:
+    steps:
+    - bundle::prepare_environment: {}
+    - bundle::install_node_dependencies: {}
+    - script@1:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            cp .eslintrc.pipeline .eslintrc
+            export ESLINT_PLUGIN_DIFF_COMMIT="origin/$BITRISEIO_GIT_BRANCH_DEST"
+            echo "ESLINT_PLUGIN_DIFF_COMMIT=$ESLINT_PLUGIN_DIFF_COMMIT"
+        title: Prepare lint env
+    - yarn@0:
+        inputs:
+        - command: lint
+        title: Lint
+    triggers:
+      pull_request:
+      - target_branch: "*"
+    meta:
+      bitrise.io:
+        stack: linux-docker-android-22.04
+        machine_type_id: g2.linux.large
+  build_android_stage:
+    envs:
+    - ENV_FILE_NAME: ".env.staging"
+      opts:
+        is_expand: false
+    steps:
+    - bundle::build_android: {}
+    meta:
+      bitrise.io:
+        stack: linux-docker-android-22.04
+        machine_type_id: g2.linux.large
+  build_android_prod:
+    envs:
+    - ENV_FILE_NAME: ".env.production"
+      opts:
+        is_expand: false
+    steps:
+    - bundle::build_android: {}
+    meta:
+      bitrise.io:
+        stack: linux-docker-android-22.04
+        machine_type_id: g2.linux.large
+  build_ios_stage:
+    envs:
+    - ENV_FILE_NAME: ".env.staging"
+      opts:
+        is_expand: false
+    steps:
+    - bundle::build_ios: {}
+  build_ios_prod:
+    envs:
+    - ENV_FILE_NAME: ".env.production"
+      opts:
+        is_expand: false
+    steps:
+    - bundle::build_ios: {}
+meta:
+  bitrise.io:
+    stack: osx-xcode-16.2.x
+    machine_type_id: g2.mac.large
+step_bundles:
+  prepare_environment:
+    steps:
+    - activate-ssh-key@4.1.1: {}
+    - git-clone@8.2.3: {}
+    - nvm@1.3.3:
+        inputs:
+        - node_version: 20
+    - script@1.2.1:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            export SOURCE_DIRECTORY=$BITRISE_SOURCE_DIR
+            sh pipeline-pre-build.sh
+    - restore-cache@2:
+        inputs:
+        - key: libs-{{ .OS }}-{{ checksum "clonePrivateLibs.sh" }}
+        - verbose: true
+        title: Restore libs cache
+    - script@1:
+        title: Clone libs
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            ls
+            test -d libs && echo "Cache hit, skipping clone" || sh clonePrivateLibs.sh
+    - save-cache@1:
+        inputs:
+        - key: libs-{{ .OS }}-{{ checksum "clonePrivateLibs.sh" }}
+        - paths: libs
+        - is_key_unique: true
+        title: Cache libs
+  install_node_dependencies:
+    steps:
+    - restore-npm-cache@2.3.1: {}
+    - yarn@0.1.3:
+        inputs:
+        - command: install
+    - save-npm-cache@1.2.0: {}
+  install_pods:
+    steps:
+    - restore-cocoapods-cache@2.1.1: {}
+    - cocoapods-install@2.4.2: {}
+    - save-cocoapods-cache@1.1.0: {}
+  buid:
+    steps:
+    - fastlane@3.5.2:
+        inputs:
+        - lane: "$FASTLANE_LANE"
+  build_ios:
+    steps:
+    - bundle::prepare_environment: {}
+    - bundle::install_node_dependencies: {}
+    - bundle::install_pods: {}
+    - bundle::buid: {}
+    - bundle::post_build: {}
+  build_android:
+    steps:
+    - bundle::prepare_environment: {}
+    - bundle::install_node_dependencies: {}
+    - restore-gradle-cache@2.2.1: {}
+    - bundle::buid: {}
+    - save-gradle-cache@1.4.2: {}
+    - bundle::post_build: {}
+  post_build:
+    steps:
+    - deploy-to-bitrise-io@2.11.0: {}
+    - fastlane@3.5.2:
+        inputs:
+        - lane: common notify_slack
+        - connection: 'off'
+        is_always_run: true
+  build_ios_xcode:
+    steps:
+    - bundle::prepare_environment: {}
+    - bundle::install_node_dependencies: {}
+    - bundle::install_pods: {}
+    - fastlane@3.5.2:
+        inputs:
+        - lane: ios bump_build_number
+    - script@1.2.1:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            echo $APP_STORE_CONNECT_API_KEY_KEY_CONTENT_DEV | base64 > "$APP_STORE_CONNECT_API_KEY_FILE_PATH"
+    - xcode-archive@5.6.0:
+        inputs:
+        - project_path: "./ios/lilypad.xcodeproj"
+        - scheme: "$IOS_SCHEME"
+        - automatic_code_signing: api-key
+        - distribution_method: app-store
+        - api_key_path: "$APP_STORE_CONNECT_API_KEY_FILE_PATH"
+        - api_key_issuer_id: "$APP_STORE_CONNECT_API_KEY_ISSUER_ID"
+        - api_key_id: "$APP_STORE_CONNECT_API_KEY_KEY_ID"
