@@ -8,11 +8,10 @@ This repository provides CI/CD pipeline examples for beta distribution of Androi
 
 You can find complete code examples in the following files and folders:
 
-- [fastlane/.env.example](fastlane/.env.example) – configuration template for Fastlane environment variables
-- [Fastfile](fastlane/Fastfile)
-- [Prebuild script for CI](pipeline-pre-build.sh)
-- [Bitrise](examples/bitrise/bitrise.yml)
-- [CircleCI](examples/circleci/.circleci/config.yml)
-- [Codemagic](examples/codemagic/codemagic.yaml)
-- [GitHub Actions](examples/github/.github)
-- [Semaphore](examples/semaphore/.semaphore)
+- [Fastlane](examples/fastlane)
+- [Prebuild script for CI](examples/fastlane)
+- [Bitrise](examples/bitrise)
+- [CircleCI](examples/circleci)
+- [Codemagic](examples/codemagic)
+- [GitHub Actions](examples/github)
+- [Semaphore](examples/semaphore)
