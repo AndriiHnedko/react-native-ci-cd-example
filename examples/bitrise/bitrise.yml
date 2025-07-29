@@ -45,7 +45,6 @@ workflows:
     - FASTLANE_LANE: ios beta
       opts:
         is_expand: false
-    - APP_STORE_CONNECT_API_KEY_FILE_PATH: "$BITRISE_SOURCE_DIR/apple.p8"
 #   here your other env variables
     steps:
     - bundle::build_ios: {}
@@ -67,6 +66,9 @@ workflows:
     - ANDROID_KEYSTORE_PASSWORD: "$ANDROID_KEYSTORE_PASSWORD_DEV"
     - ANDROID_KEY_ALIAS: "$ANDROID_KEY_ALIAS_DEV"
     - ANDROID_KEY_PASSWORD: "$ANDROID_KEY_PASSWORD_DEV"
+    - FASTLANE_LANE: android beta
+      opts:
+        is_expand: false
     steps:
     - bundle::build_android: {}
     meta:
@@ -111,6 +113,9 @@ workflows:
     - ANDROID_KEYSTORE_PASSWORD: "$ANDROID_KEYSTORE_PASSWORD_STAGE"
     - ANDROID_KEY_ALIAS: "$ANDROID_KEY_ALIAS_STAGE"
     - ANDROID_KEY_PASSWORD: "$ANDROID_KEY_PASSWORD_STAGE"
+    - FASTLANE_LANE: android beta
+      opts:
+        is_expand: false
     steps:
     - bundle::build_android: {}
     meta:
@@ -129,6 +134,9 @@ workflows:
     - ANDROID_KEYSTORE_PASSWORD: "$ANDROID_KEYSTORE_PASSWORD_PROD"
     - ANDROID_KEY_ALIAS: "$ANDROID_KEY_ALIAS_PROD"
     - ANDROID_KEY_PASSWORD: "$ANDROID_KEY_PASSWORD_PROD"
+    - FASTLANE_LANE: android release
+      opts:
+        is_expand: false
     steps:
     - bundle::build_android: {}
     meta:
