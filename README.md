@@ -11,8 +11,8 @@ You can find complete code examples in the following files and folders:
 - [fastlane/.env.example](fastlane/.env.example) – configuration template for Fastlane environment variables
 - [Fastfile](fastlane/Fastfile)
 - [Prebuild script for CI](pipeline-pre-build.sh)
-- [Bitrise](examples/bitrise)
-- [CircleCI](examples/circleci/.circleci)
-- [Codemagic](examples/codemagic)
+- [Bitrise](examples/bitrise/bitrise.yml)
+- [CircleCI](examples/circleci/.circleci/config.yml)
+- [Codemagic](examples/codemagic/codemagic.yaml)
 - [GitHub Actions](examples/github/.github)
 - [Semaphore](examples/semaphore/.semaphore)
