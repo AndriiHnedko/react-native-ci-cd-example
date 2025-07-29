@@ -2,7 +2,9 @@
 
 Copy the contents of bitrise.yml into the configuration panel on bitrise.io, or place the file at the root of your project.
 
-# About 
+# About
+
+All workflows in this setup are based on Fastlane, which handles building, code signing, and distribution processes across both platforms.
 
 ## Prepare environment
 
@@ -30,14 +32,13 @@ To disable this behavior, remove the following code:
 
 ## Build
 
-This workflow builds both iOS and Android apps for development, staging, and production environments.
-Since each environment is linked to a separate App Store Connect organization, the approach to connecting the Apple Developer Account differs:
-- In the development environment, the App Store Connect API key is used via Fastlane.
-- In other environments, the connection is established via Apple ID through the Bitrise web interface.
+This workflow builds both iOS and Android apps for development, staging, and production environments using Fastlane.
+All environments use Apple ID authentication for connecting the Apple Developer Account via the Bitrise web interface.
 
-Bitrise automatically determines the method to use, and both options are compatible with Fastlane.
+Android builds are delivered to Firebase App Distribution, and iOS builds are delivered to TestFlight — both via Fastlane.
+Additionally, build artifacts are stored in Bitrise for download.
 
-At the end of the build, a Slack notification is sent to the channel indicating success or failure.
+A Slack notification is sent to the channel at the end of the build to indicate success or failure.
 
 ## Features
 
