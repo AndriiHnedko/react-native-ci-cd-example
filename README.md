@@ -9,7 +9,7 @@ This repository provides CI/CD pipeline examples for beta distribution of Androi
 You can find complete code examples in the following files and folders:
 
 - [Fastlane](examples/fastlane)
-- [Prebuild script for CI](examples/fastlane)
+- [Prebuild script for CI](examples/pre-build)
 - [Bitrise](examples/bitrise)
 - [CircleCI](examples/circleci)
 - [Codemagic](examples/codemagic)
