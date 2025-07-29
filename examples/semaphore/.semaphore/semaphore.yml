@@ -14,11 +14,24 @@ blocks:
 promotions:
   - name: Build dev ios beta
     pipeline_file: build_ios.yml
-    deployment_target: Lilypad_dev
-#    auto_promote:
-#      when: "branch = 'feature/1110-ci-cd'"
+    deployment_target: my_app_dev
+  #    auto_promote:
+  #      when: "branch = 'feature/1110-ci-cd'"
   - name: Build dev android beta
     pipeline_file: build_android.yml
-    deployment_target: Lilypad_dev
-    auto_promote:
-      when: "branch = 'feature/1110-ci-cd'"
+    deployment_target: my_app_dev
+  #    auto_promote:
+  #      when: "branch = 'feature/1110-ci-cd'"
+  - name: Build stage ios beta
+    pipeline_file: build_ios.yml
+    deployment_target: my_app_stage
+  - name: Build stage android beta
+    pipeline_file: build_android.yml
+    deployment_target: my_app_stage
+  - name: Build prod ios beta
+    pipeline_file: build_ios.yml
+    deployment_target: my_app_prod
+  - name: Build prod android beta
+    pipeline_file: build_android.yml
+    deployment_target: my_app_prod
+
