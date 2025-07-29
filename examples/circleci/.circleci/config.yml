@@ -1,12 +1,28 @@
 version: 2.1
 
 commands:
+  resolve-android-keystore-path:
+    description: Resolve android keystore path
+    steps:
+      - run:
+          name: Resolve android keystore path
+          command: echo 'export ANDROID_KEYSTORE_PATH="$CIRCLE_WORKING_DIRECTORY/android/app/release.keystore"' >> $BASH_ENV
+
+  resolve-google-application-credentials-path:
+    description: Resolve google application credentials path
+    steps:
+      - run:
+          name: Resolve google application credentials path
+          command: echo 'export ANDROID_KEYSTORE_PATH="$CIRCLE_WORKING_DIRECTORY/fastlane/google_credentials.json"' >> $BASH_ENV
+
   pre-build:
     description: Prebuild actions
     steps:
       - run:
           name: Prebuild actions
-          command: sh pipeline-pre-build.sh
+          command: |
+            export SOURCE_DIRECTORY=$CIRCLE_WORKING_DIRECTORY
+            sh pipeline-pre-build.sh
 
   js-dependencies:
     description: Install JS dependencies
@@ -100,6 +116,8 @@ jobs:
       - image: cimg/android:2022.09.2-node
     steps:
       - checkout
+      - resolve-android-keystore-path
+      - resolve-google-application-credentials-path
       - pre-build
       - js-dependencies
       - gradle-dependencies
