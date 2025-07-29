@@ -1,0 +1,82 @@
+workflows:
+  build_ios:
+    name: Build ios app
+    instance_type: mac_mini_m2
+    inputs:
+      target_env:
+        description: What env should build?
+        type: choice
+        options:
+          - develop
+        default: develop
+    environment:
+      groups:
+        - ${{ inputs.target_env }}
+        - github_auth
+      vars:
+        CURRENT_PLATFORM: ios
+      node: 20
+    cache:
+      cache_paths:
+        - $CM_BUILD_DIR/vendor/bundle
+        - $CM_BUILD_DIR/node_modules
+        - $CM_BUILD_DIR/ios/Pods
+        - $CM_BUILD_DIR/libs
+#    triggering:
+#      events:
+#        - push
+#      branch_patterns:
+#        - pattern: feature/1110-ci-cd
+#          include: true
+#          source: true
+    scripts:
+      - &prepare_environment
+        name: Prepare environment
+        script: |
+          export SOURCE_DIRECTORY=$CM_BUILD_DIR
+          sh pipeline-pre-build.sh
+          bundle install --path vendor/bundle
+          test -d libs && echo "Cache hit, skipping clone" || sh clonePrivateLibs.sh
+      - &install_node_modules
+        name: Install node modules
+        script: |
+          yarn install
+      - name: Install pods
+        script: |
+          cd ios
+          pod install
+          cd ../
+      - name: Build iOS beta app
+        script: |
+          bundle exec fastlane ios beta
+  build_android:
+    name: Build android app
+    instance_type: mac_mini_m2
+    inputs:
+      target_env:
+        description: What env should build?
+        type: choice
+        options:
+          - develop
+        default: develop
+    environment:
+      groups:
+        - ${{ inputs.target_env }}
+        - github_auth
+      vars:
+        CURRENT_PLATFORM: android
+        GOOGLE_APPLICATION_CREDENTIALS: $CM_BUILD_DIR/fastlane/google_credentials.json
+        ANDROID_KEYSTORE_PATH: $CM_BUILD_DIR/android/app/release.keystore
+      node: 20
+    cache:
+      cache_paths:
+        - $CM_BUILD_DIR/vendor/bundle
+        - $CM_BUILD_DIR/node_modules
+        - $CM_BUILD_DIR/libs
+        - $HOME/.gradle/caches
+    scripts:
+      - *prepare_environment
+      - *install_node_modules
+      - name: Build android beta app
+        script: |
+          bundle exec fastlane android beta
