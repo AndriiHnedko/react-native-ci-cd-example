@@ -8,6 +8,8 @@ workflows:
         type: choice
         options:
           - develop
+          - staging
+          - production
         default: develop
     environment:
       groups:
@@ -58,6 +60,8 @@ workflows:
         type: choice
         options:
           - develop
+          - staging
+          - production
         default: develop
     environment:
       groups:
