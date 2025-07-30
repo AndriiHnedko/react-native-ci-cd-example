@@ -8,7 +8,8 @@ All workflows in this setup are based on Fastlane, which handles building, code 
 
 ## Prepare environment
 
-This workflow prepares the environment, clones private libraries, and caches them.
+This workflow prepares the environment using the `pipeline-pre-build.sh` script.  
+After that, private libraries are cloned and cached if not already present.
 
 ## Install dependencies
 
